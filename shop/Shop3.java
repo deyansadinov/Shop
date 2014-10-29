@@ -1,11 +1,15 @@
 package shop;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
 /**
  * @author Deyan Sadinov <sadinov88@gmail.com>
  */
-public class Shop3 {
+public class Shop3  {
 
   private final HashMap<String, Integer> slot;
   private HashMap<String, ProductSlot> productHolder = new HashMap<String, ProductSlot>();
@@ -15,15 +19,16 @@ public class Shop3 {
   }
 
 
-  public void add(String name, int quantity) {
+  public void add(String name, int quantity,double price) {
     if (quantity > slot.get(name)) {
       throw new NotEnoughQuantityException();
     }
-    productHolder.put(name, new ProductSlot(new Product(name), quantity));
+    productHolder.put(name, new ProductSlot(new Product(name,price), quantity));
+
   }
 
   public int sell(String name, int quantity) {
-    if (productHolder.size() == 0 || productHolder.get(name) == null) {
+    if ( productHolder.get(name) == null) {
       throw new EmptyShopException();
     }
     ProductSlot productSlot = productHolder.get(name);
@@ -37,6 +42,28 @@ public class Shop3 {
     }
     return productSlot.add(quantity);
   }
+
+  public void sellOrder(MyOrderList orderList) {
+    HashMap<String,Integer> order = orderList.getOrderList();
+    for (Entry<String,Integer> entry : order.entrySet()){
+     sell(entry.getKey(),entry.getValue());
+    }
+  }
+
+  public List<Product> sortByPrice(SortByPrice sortByPrice) {
+    List<Product> listProduct = new ArrayList<Product>();
+    List<ProductSlot> list = new ArrayList<ProductSlot>(productHolder.values());
+    for (ProductSlot productSlot : list) {
+      listProduct.add(productSlot.getProduct());
+    }
+    Collections.sort(listProduct, sortByPrice);
+    return listProduct;
+  }
+
+  public Product getProductByName(String name) {
+    return  productHolder.get(name).getProduct();
+  }
+
 
   private class ProductSlot {
 
@@ -62,5 +89,10 @@ public class Shop3 {
     private int add(int quantity) {
       return currentQuantity += quantity;
     }
+
+    public Product getProduct() {
+      return product;
+    }
   }
+
 }
